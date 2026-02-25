@@ -10,5 +10,8 @@ const router = Router();
 // router for login
 router.post("/login", authController.login);
 
+// router for signup
+router.post("/signup", authController.signup);
+
 // exporting the router
 export default router;

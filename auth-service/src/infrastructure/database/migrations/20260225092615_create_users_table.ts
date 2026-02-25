@@ -1,17 +1,17 @@
 import { Knex } from "knex";
 
-export async function up(knex: Knex): Promise<void> {
+export async function up(knex: Knex) {
   await knex.schema.createTable("users", (table) => {
     table.uuid("id").primary().defaultTo(knex.raw("gen_random_uuid()"));
-    table.string("name", 100).notNullable();
+    table.string("username", 100).notNullable();
     table.string("email", 150).unique().notNullable();
     table.string("password").notNullable();
-    table.boolean("is_verified").defaultTo(false);
+    table.string("role").notNullable();
+    table.string("phone_number").notNullable();
     table.timestamp("created_at").defaultTo(knex.fn.now());
-    table.timestamp("updated_at").defaultTo(knex.fn.now());
   });
 }
 
-export async function down(knex: Knex): Promise<void> {
+export async function down(knex: Knex) {
   await knex.schema.dropTable("users");
 }

@@ -2,7 +2,7 @@
 
 // importing the required modules
 import { IUserRepository } from "../../domain/interfaces/IUserRepository";
-import { LoginDTO } from "../dto/AuthDTO";
+import { LoginDTO, SignupDTO } from "../dto/AuthDTO";
 import { PasswordHasher } from "../../infrastructure/security/PasswordHasher";
 import { JwtService } from "../../infrastructure/security/JwtService";
 
@@ -10,6 +10,7 @@ import { JwtService } from "../../infrastructure/security/JwtService";
 export class AuthUseCase {
   constructor(private repo: IUserRepository) {}
 
+  // for login the user
   async login({ email, password }: LoginDTO) {
     const user = await this.repo.findByEmail(email);
     if (!user) throw new Error("Invalid email or password");
@@ -23,8 +24,32 @@ export class AuthUseCase {
       user: {
         id: user.id,
         email: user.email,
-        name: user.name,
+        name: user.username,
       },
     };
+  }
+
+  // for creating new user
+  async createUser({
+    email,
+    username,
+    password,
+    role,
+    phone_number,
+  }: SignupDTO) {
+    const existingUser = await this.repo.findByEmail(email);
+
+    if (existingUser) throw new Error("User with same email already exists");
+
+    const hashPassword = await PasswordHasher.hash(password);
+
+    return await this.repo.createUser({
+      username,
+      email,
+      password: hashPassword,
+      phone_number,
+      role: role,
+      created_at: new Date(),
+    });
   }
 }

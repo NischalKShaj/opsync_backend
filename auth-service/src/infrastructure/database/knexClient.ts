@@ -1,5 +1,6 @@
 import knex from "knex";
-import knexConfig from "../../../knexfile";
+// FIX: use require for CommonJS knexfile.js
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const config = require("../../../knexfile");
 
-const environment = "development";
-export const db = knex(knexConfig[environment]);
+export const db = knex(config.development);

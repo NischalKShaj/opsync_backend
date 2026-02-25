@@ -2,9 +2,11 @@
 
 // interface for the user
 export interface User {
-  id: string;
+  id?: string;
   email: string;
   password: string;
-  name: string;
+  username: string;
+  phone_number: string;
   role: string;
+  created_at: Date;
 }
