@@ -7,4 +7,8 @@ import { createProxyMiddleware } from "http-proxy-middleware";
 export const AuthProxy = createProxyMiddleware({
   target: process.env.AUTH_SERVICE_URL || "http://localhost:3001",
   changeOrigin: true,
+  pathRewrite: (path, req) => {
+    console.log("Before rewrite:", path);
+    return `/auth${path}`; // <-- THIS FIXES YOUR PROBLEM
+  },
 });
