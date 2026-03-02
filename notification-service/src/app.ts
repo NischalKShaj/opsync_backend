@@ -11,7 +11,7 @@ import { Request, Response } from "express";
 dotenv.config();
 
 // importing the routes
-// import authRoutes from "./presentation/routes/authRoute";
+import notificationRoutes from "./presentation/routes/router";
 
 // creating the express app
 const app = express();
@@ -24,6 +24,6 @@ app.use(express.urlencoded({ extended: true, limit: "500mb" }));
 app.use(morgan("dev"));
 
 // Routes
-// app.use("/otp", otpRoutes);
+app.use("/notification", notificationRoutes);
 
 export default app;

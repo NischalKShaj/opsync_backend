@@ -13,5 +13,8 @@ router.post("/login", authController.login);
 // router for signup
 router.post("/signup", authController.signup);
 
+// for verify the otp and signup the user
+router.post("/verify-otp", authController.verifyOTP);
+
 // exporting the router
 export default router;

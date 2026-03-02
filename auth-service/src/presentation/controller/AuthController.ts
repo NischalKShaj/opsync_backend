@@ -15,27 +15,60 @@ export class AuthController {
       return res.status(200).json({ success: true, data: result });
     } catch (error: any) {
       console.error("Error from login controller:", error);
-      return res.status(500).json({ success: false, error: error.message });
+      if (error instanceof Error) {
+        return res.status(500).json({ success: false, error: error.message });
+      }
+      return res
+        .status(500)
+        .json({ success: false, error: "something went wrong" });
     }
   };
 
   // for signup the user
   signup = async (req: Request, res: Response) => {
     try {
-      const { email, username, phoneNumber, password, role } = req.body;
+      const { email } = req.body;
       const result = await this.useCase.createUser({
         email,
+      });
+      return res.status(200).json({ success: true, data: result });
+    } catch (error: any) {
+      console.error("error from the signup controller", error);
+      if (error instanceof Error) {
+        return res.status(500).json({ success: false, error: error.message });
+      }
+      return res
+        .status(500)
+        .json({ success: false, error: "something went wrong" });
+    }
+  };
+
+  // for verifying the otp
+  verifyOTP = async (req: Request, res: Response) => {
+    try {
+      const { email, otp, username, phoneNumber, password, role } = req.body;
+
+      await this.useCase.verifyOTP({
+        email,
+        otp,
         username,
-        password,
         phone_number: phoneNumber,
         role,
+        password,
       });
+
       return res
         .status(201)
         .json({ success: true, data: "user created successfully" });
-    } catch (error: any) {
-      console.error("error from the signup controller", error);
-      res.status(500).json({ success: false, error: error.message });
+    } catch (error: unknown) {
+      console.error("error from the verify otp", error);
+
+      if (error instanceof Error) {
+        return res.status(500).json({ success: false, error: error.message });
+      }
+      return res
+        .status(500)
+        .json({ success: false, error: "something went wrong" });
     }
   };
 }

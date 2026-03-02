@@ -6,10 +6,16 @@ export interface LoginDTO {
   password: string;
 }
 
-// interface for signup
-export interface SignupDTO {
-  username: string;
+// interface for signup the user and gen the otp
+export interface OTPSignupDTO {
   email: string;
+}
+
+// interface for the otp signup
+export interface SignupDTO {
+  email: string;
+  otp: string;
+  username: string;
   phone_number: string;
   password: string;
   role: string;
