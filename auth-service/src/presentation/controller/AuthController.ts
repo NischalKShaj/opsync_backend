@@ -28,12 +28,28 @@ export class AuthController {
   signup = async (req: Request, res: Response) => {
     try {
       const { email } = req.body;
-      const result = await this.useCase.createUser({
-        email,
-      });
+      const result = await this.useCase.createUser({ email });
       return res.status(200).json({ success: true, data: result });
     } catch (error: any) {
       console.error("error from the signup controller", error);
+      if (error instanceof Error) {
+        return res.status(500).json({ success: false, error: error.message });
+      }
+      return res
+        .status(500)
+        .json({ success: false, error: "something went wrong" });
+    }
+  };
+
+  // for resending the otp
+  resendOTP = async (req: Request, res: Response) => {
+    try {
+      const { email } = req.body;
+
+      const result = await this.useCase.resendOTP({ email });
+      return res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      console.error("error from the resend controller", error);
       if (error instanceof Error) {
         return res.status(500).json({ success: false, error: error.message });
       }

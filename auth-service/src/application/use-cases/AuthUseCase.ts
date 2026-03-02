@@ -70,6 +70,7 @@ export class AuthUseCase {
       // for setting the rate limiter for the resend logic
       const cooldownKey = `otp:cooldown:${email}`;
 
+      // creating the key
       const cooldown = await redis.get(cooldownKey);
 
       if (cooldown)
