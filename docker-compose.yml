@@ -1,0 +1,114 @@
+version: "3.9"
+
+services:
+  #===================
+  # PostgreSQL
+  #===================
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: NiscDev@123
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d
+    networks:
+      - opsync-net
+
+  #===================
+  # Redis
+  #===================
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - opsync-net
+
+
+  # ===========================
+  # Auth Service
+  # ===========================
+  auth-service:
+    container_name: auth-service
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    environment:
+      PORT: 4001
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER:  postgres
+      DB_PASSWORD: NiscDev@123
+      DB_NAME: opsync_auth
+      REDIS_URL: redis://redis:6379
+      NOTIFICATION_URL: http://notification-service:4002
+    ports:
+      - "4001:4001"
+    depends_on:
+      - postgres
+      - redis
+      - notification-service
+    networks:
+      - opsync-net
+
+  # ===========================
+  # Notification Service
+  # ===========================
+  notification-service:
+    container_name: notification-service
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    environment:
+      PORT: 4002
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER:  postgres
+      DB_PASSWORD: NiscDev@123
+      DB_NAME: opsync_notification
+      EMAIL: your_email@gmail.com
+      PASSWORD: your_email_password
+    ports:
+      - "4002:4002"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - opsync-net
+
+  # ===========================
+  # API Gateway (Optional)
+  # ===========================
+  gateway:
+    container_name: gateway
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      AUTH_URL: http://auth-service:4001
+    depends_on:
+      - auth-service
+    networks:
+      - opsync-net
+
+# ===========================
+# Volumes
+# ===========================
+volumes:
+  postgres_data:
+
+# ===========================
+# Network
+# ===========================
+networks:
+  opsync-net:
+    driver: bridge
