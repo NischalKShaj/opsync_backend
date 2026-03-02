@@ -40,6 +40,9 @@ services:
     build:
       context: ./auth-service
       dockerfile: Dockerfile
+    volumes:
+      - ./auth-service:/app
+      - /app/node_modules
     environment:
       PORT: 4001
       DB_HOST: postgres
@@ -66,6 +69,9 @@ services:
     build:
       context: ./notification-service
       dockerfile: Dockerfile
+    volumes:
+      - ./notification-service:/app
+      - /app/node_modules
     environment:
       PORT: 4002
       DB_HOST: postgres
@@ -91,10 +97,13 @@ services:
     build:
       context: ./api-gateway
       dockerfile: Dockerfile
-    ports:
-      - "4000:4000"
+    volumes:
+      - ./api-gateway:/app
+      - /app/node_modules
     environment:
       AUTH_URL: http://auth-service:4001
+    ports:
+      - "4000:4000"
     depends_on:
       - auth-service
     networks:
