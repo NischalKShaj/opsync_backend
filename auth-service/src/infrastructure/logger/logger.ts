@@ -17,14 +17,14 @@ const logger = createLogger({
   format: format.combine(
     format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
     format.errors({ stack: true }),
-    format.json(),
+    format.prettyPrint(),
   ),
   transports: [
     // for all the error logs
     new transports.File({ filename: "logs/error.log", level: "error" }),
 
     // for all the other logs
-    new transports.File({ filename: "logs/info.log" }),
+    new transports.File({ filename: "logs/info.log", level: "info" }),
   ],
 });
 // for logging in the console during development
