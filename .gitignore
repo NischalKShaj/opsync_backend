@@ -1,2 +1,21 @@
-node_modules
+# Node
+node_modules/
+npm-debug.log
+
+# Build output
+dist/
+
+# Environment files
 .env
+.env.*
+
+# Logs
+logs/
+*.log
+
+# Editor/OS files
+.DS_Store
+Thumbs.db
+
+# TS build artifacts
+*.tsbuildinfo

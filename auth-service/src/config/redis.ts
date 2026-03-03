@@ -2,6 +2,7 @@
 
 // importing the required modules
 import { createClient } from "redis";
+import logger from "../infrastructure/logger/logger";
 
 // setting the url
 const redis = createClient({
@@ -9,11 +10,11 @@ const redis = createClient({
 });
 
 redis.on("error", (err) => {
-  console.error("❌ Redis Error:", err);
+  logger.error("Redis Client Error", { error: err.message, stack: err.stack });
 });
 
 redis.on("connect", () => {
-  console.log("✅ Redis Connected");
+  logger.info("✅ Redis Connected");
 });
 
 redis.connect();

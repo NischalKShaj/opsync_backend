@@ -11,7 +11,7 @@ import corsOption from "./config/cors";
 dotenv.config();
 
 // importing the proxies
-import { AuthProxy } from "./proxy/auth.proxy";
+import { AuthProxy } from "./presentation/proxy/auth.proxy";
 
 // setting up the app
 const app = express();

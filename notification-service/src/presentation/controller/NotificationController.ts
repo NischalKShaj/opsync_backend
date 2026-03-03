@@ -3,6 +3,7 @@
 // importing the required modules
 import { Request, Response } from "express";
 import { NotificationUseCase } from "../../application/use-cases/NotificationUseCase";
+import logger from "../../infrastructure/logger/logger";
 
 export class NotificationController {
   constructor(private notificationUseCase: NotificationUseCase) {}
@@ -18,8 +19,11 @@ export class NotificationController {
         type,
       });
       return res.status(200).json(result);
-    } catch (error) {
-      console.error("error", error);
+    } catch (error: any) {
+      logger.error("Error while sending the OTP via mail", {
+        error: error.message,
+        stack: error.stack,
+      });
       if (error instanceof Error) {
         return res.status(500).json({ success: false, error: error.message });
       }

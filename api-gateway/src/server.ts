@@ -3,6 +3,7 @@
 // importing the required modules
 import app from "./app";
 import dotenv from "dotenv";
+import logger from "./infrastructure/logger/logger";
 
 dotenv.config();
 
@@ -11,5 +12,5 @@ const port = process.env.PORT || 3000;
 
 // starting the server
 app.listen(port, () => {
-  console.log(`Main server running on port: ${port}`);
+  logger.info(`Main server running on port ${port}`);
 });

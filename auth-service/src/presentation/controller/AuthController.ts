@@ -3,6 +3,7 @@
 // importing the required modules
 import { Request, Response } from "express";
 import { AuthUseCase } from "../../application/use-cases/AuthUseCase";
+import logger from "../../infrastructure/logger/logger";
 
 // creating the auth controller
 export class AuthController {
@@ -11,10 +12,18 @@ export class AuthController {
   // for login the user
   login = async (req: Request, res: Response) => {
     try {
+      logger.info("Login request received", {
+        email: req.body.email,
+        password: req.body.password,
+        type: typeof req.body.password,
+      });
       const result = await this.useCase.login(req.body);
       return res.status(200).json({ success: true, data: result });
     } catch (error: any) {
-      console.error("Error from login controller:", error);
+      logger.error("Error during login", {
+        error: error.message,
+        stack: error.stack,
+      });
       if (error instanceof Error) {
         return res.status(500).json({ success: false, error: error.message });
       }
@@ -31,7 +40,10 @@ export class AuthController {
       const result = await this.useCase.createUser({ email });
       return res.status(200).json({ success: true, data: result });
     } catch (error: any) {
-      console.error("error from the signup controller", error);
+      logger.error("Error during signup", {
+        error: error.message,
+        stack: error.stack,
+      });
       if (error instanceof Error) {
         return res.status(500).json({ success: false, error: error.message });
       }
@@ -48,8 +60,11 @@ export class AuthController {
 
       const result = await this.useCase.resendOTP({ email });
       return res.status(200).json({ success: true, data: result });
-    } catch (error) {
-      console.error("error from the resend controller", error);
+    } catch (error: any) {
+      logger.error("Error during resend OTP", {
+        error: error.message,
+        stack: error.stack,
+      });
       if (error instanceof Error) {
         return res.status(500).json({ success: false, error: error.message });
       }
@@ -64,7 +79,7 @@ export class AuthController {
     try {
       const { email, otp, username, phoneNumber, password, role } = req.body;
 
-      await this.useCase.verifyOTP({
+      const result = await this.useCase.verifyOTP({
         email,
         otp,
         username,
@@ -73,11 +88,12 @@ export class AuthController {
         password,
       });
 
-      return res
-        .status(201)
-        .json({ success: true, data: "user created successfully" });
-    } catch (error: unknown) {
-      console.error("error from the verify otp", error);
+      return res.status(201).json({ success: true, data: result });
+    } catch (error: any) {
+      logger.error("Error during verify OTP", {
+        error: error.message,
+        stack: error.stack,
+      });
 
       if (error instanceof Error) {
         return res.status(500).json({ success: false, error: error.message });

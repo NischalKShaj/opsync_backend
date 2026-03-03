@@ -6,7 +6,6 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import dotenv from "dotenv";
-import { Request, Response } from "express";
 
 dotenv.config();
 
@@ -21,7 +20,9 @@ app.use(cors());
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true, limit: "500mb" }));
-app.use(morgan("dev"));
+if (process.env.NODE_ENV !== "production") {
+  app.use(morgan("dev"));
+}
 
 // Routes
 app.use("/auth", authRoutes);

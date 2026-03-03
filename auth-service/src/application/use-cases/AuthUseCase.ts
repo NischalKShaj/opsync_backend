@@ -129,6 +129,8 @@ export class AuthUseCase {
         role: role,
         created_at: new Date(),
       });
+
+      return "User created successfully";
     } catch (error) {
       throw error;
     }
