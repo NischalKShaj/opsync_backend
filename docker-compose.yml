@@ -8,14 +8,13 @@ services:
     image: postgres:16
     container_name: postgres
     restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: NiscDev@123
+    env_file:
+      - ./.env.postgres
     ports:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./db-init:/docker-entrypoint-initdb.d
+      - ./sql:/docker-entrypoint-initdb.d
     networks:
       - opsync-net
 
@@ -43,15 +42,8 @@ services:
     volumes:
       - ./auth-service:/app
       - /app/node_modules
-    environment:
-      PORT: 4001
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER:  postgres
-      DB_PASSWORD: NiscDev@123
-      DB_NAME: opsync_auth
-      REDIS_URL: redis://redis:6379
-      NOTIFICATION_URL: http://notification-service:4002
+    env_file:
+      - ./auth-service/.env.docker
     ports:
       - "4001:4001"
     depends_on:
@@ -72,15 +64,8 @@ services:
     volumes:
       - ./notification-service:/app
       - /app/node_modules
-    environment:
-      PORT: 4002
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER:  postgres
-      DB_PASSWORD: NiscDev@123
-      DB_NAME: opsync_notification
-      EMAIL: your_email@gmail.com
-      PASSWORD: your_email_password
+    env_file:
+      - ./notification-service/.env.docker
     ports:
       - "4002:4002"
     depends_on:
@@ -100,8 +85,8 @@ services:
     volumes:
       - ./api-gateway:/app
       - /app/node_modules
-    environment:
-      AUTH_URL: http://auth-service:4001
+    env_file:
+      - ./api-gateway/.env.docker
     ports:
       - "4000:4000"
     depends_on:
