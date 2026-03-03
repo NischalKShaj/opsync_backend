@@ -12,6 +12,10 @@ if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir);
 }
 
+const infoOnly = format((log) => {
+  return log.level === "info" ? log : false;
+})();
+
 const logger = createLogger({
   level: "info",
   format: format.combine(
@@ -24,7 +28,11 @@ const logger = createLogger({
     new transports.File({ filename: "logs/error.log", level: "error" }),
 
     // for all the other logs
-    new transports.File({ filename: "logs/info.log", level: "info" }),
+    new transports.File({
+      filename: "logs/info.log",
+      level: "info",
+      format: format.combine(infoOnly), // ← THIS IS THE FIX
+    }),
   ],
 });
 // for logging in the console during development
