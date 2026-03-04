@@ -19,5 +19,8 @@ router.post("/verify-otp", authController.verifyOTP);
 // for resending the otp
 router.post("/resend-otp", authController.resendOTP);
 
+// for logout the user
+router.post("/logout", authController.logout);
+
 // exporting the router
 export default router;

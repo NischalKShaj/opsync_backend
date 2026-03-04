@@ -10,4 +10,7 @@ export interface IUserRepository {
 
   // for creating the user
   createUser: (user: User) => Promise<User | null>;
+
+  // for updating the user
+  updateUser: (user: User) => Promise<User | null>;
 }

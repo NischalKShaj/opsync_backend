@@ -103,4 +103,18 @@ export class AuthController {
         .json({ success: false, error: "something went wrong" });
     }
   };
+
+  // for user logout
+  logout = async (req: Request, res: Response) => {
+    try {
+      const { refreshToken } = req.body;
+      const result = await this.useCase.logout({ refreshToken });
+      return res.status(200).json({ success: true, data: result });
+    } catch (error: any) {
+      logger.error("Error during logout", {
+        error: error.message,
+        stack: error.stack,
+      });
+    }
+  };
 }

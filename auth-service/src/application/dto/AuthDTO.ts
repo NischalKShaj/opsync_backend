@@ -20,3 +20,8 @@ export interface SignupDTO {
   password: string;
   role: string;
 }
+
+// interface for the logout
+export interface LogoutDTO {
+  refreshToken: string;
+}

@@ -4,6 +4,7 @@
 import { db } from "../database/knexClient";
 import { IUserRepository } from "../../domain/interfaces/IUserRepository";
 import { User } from "../../domain/entities/User";
+import logger from "../logger/logger";
 
 // creating the user repository
 export class UserRepository implements IUserRepository {
@@ -21,6 +22,22 @@ export class UserRepository implements IUserRepository {
   async createUser(user: User): Promise<User | null> {
     try {
       const [result] = await db<User>("users").insert(user).returning("*");
+      return result || null;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // for updating the user
+  async updateUser(user: User): Promise<User | null> {
+    try {
+      logger.info(
+        `value from the update use repository ${JSON.stringify(user)}`,
+      );
+      const [result] = await db<User>("users")
+        .where({ id: user.id })
+        .update(user)
+        .returning("*");
       return result || null;
     } catch (error) {
       throw error;

@@ -2,18 +2,21 @@
 
 // importing the required modules
 import { IUserRepository } from "../../domain/interfaces/IUserRepository";
-import { LoginDTO, OTPSignupDTO, SignupDTO } from "../dto/AuthDTO";
+import { LoginDTO, LogoutDTO, OTPSignupDTO, SignupDTO } from "../dto/AuthDTO";
 import { PasswordHasher } from "../../infrastructure/security/PasswordHasher";
 import { JwtService } from "../../infrastructure/security/JwtService";
 import { generateOTP } from "../../domain/utils/generateOTP";
 import redis from "../../config/redis";
 import { NotificationService } from "../../infrastructure/external-service/otpService";
+import { ITokenRepository } from "../../domain/interfaces/ITokenRepository";
+import { randomUUID } from "crypto";
 
 // creating the class for the auth use case
 export class AuthUseCase {
   constructor(
     private repo: IUserRepository,
     private notification: NotificationService,
+    private tokenRepo: ITokenRepository,
   ) {}
 
   // for login the user
@@ -27,9 +30,23 @@ export class AuthUseCase {
       const match = await PasswordHasher.compare(password, user.password);
       if (!match) throw new Error("Invalid email or password");
 
+      // creating the access token and the refresh token
+      const access_token = JwtService.generateAccessToken(user.id, user.role);
+
+      const refresh_token = JwtService.generateRefreshToken(user.id, user.role);
+
+      const refreshToken = {
+        user_id: user.id!,
+        token: refresh_token,
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+        created_at: new Date(),
+      };
+      // storing the refresh token in the database
+      await this.tokenRepo.createToken(refreshToken);
+
       return {
-        accessToken: JwtService.generateAccessToken(user.id, user.role),
-        refreshToken: JwtService.generateRefreshToken(user.id, user.role),
+        accessToken: access_token,
+        refreshToken: refresh_token,
         user: {
           id: user.id,
           email: user.email,
@@ -131,6 +148,17 @@ export class AuthUseCase {
       });
 
       return "User created successfully";
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // for logout the user
+  async logout({ refreshToken }: LogoutDTO) {
+    try {
+      // deleting the refresh token from the database
+      await this.tokenRepo.deleteToken(refreshToken);
+      return "Logged out successfully";
     } catch (error) {
       throw error;
     }
