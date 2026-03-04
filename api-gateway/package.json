@@ -20,6 +20,8 @@
     "http-proxy-middleware": "^3.0.5",
     "morgan": "^1.10.1",
     "nodemon": "^3.1.14",
+    "rate-limiter-flexible": "^9.1.1",
+    "redis": "^5.11.0",
     "winston": "^3.19.0",
     "winston-daily-rotate-file": "^5.0.0"
   },
