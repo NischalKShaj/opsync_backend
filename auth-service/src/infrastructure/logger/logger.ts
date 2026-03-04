@@ -2,6 +2,7 @@
 
 // importing the required modules
 import { createLogger, format, transports } from "winston";
+import DailyRotateFile from "winston-daily-rotate-file";
 import fs from "fs";
 import path from "path";
 
@@ -21,17 +22,27 @@ const logger = createLogger({
   format: format.combine(
     format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
     format.errors({ stack: true }),
-    format.prettyPrint(),
+    format.json(),
   ),
   transports: [
     // for all the error logs
-    new transports.File({ filename: "logs/error.log", level: "error" }),
-
+    new DailyRotateFile({
+      filename: "logs/error-%DATE%.log",
+      level: "error",
+      datePattern: "YYYY-MM-DD",
+      maxFiles: "1d",
+      zippedArchive: true,
+      auditFile: "logs/error-audit.json",
+    }),
     // for all the other logs
-    new transports.File({
-      filename: "logs/info.log",
+    new DailyRotateFile({
+      filename: "logs/info-%DATE%.log",
       level: "info",
-      format: format.combine(infoOnly), // ← THIS IS THE FIX
+      datePattern: "YYYY-MM-DD",
+      maxFiles: "1d",
+      zippedArchive: true,
+      auditFile: "logs/info-audit.json",
+      format: format.combine(infoOnly),
     }),
   ],
 });

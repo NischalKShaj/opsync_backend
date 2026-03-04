@@ -2,6 +2,7 @@
 
 // importing the required modules
 import { createLogger, format, transports } from "winston";
+import DailyRotateFile from "winston-daily-rotate-file";
 import fs from "fs";
 import path from "path";
 
@@ -12,6 +13,10 @@ if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir);
 }
 
+const infoOnly = format((log) => {
+  return log.level === "info" ? log : false;
+})();
+
 const logger = createLogger({
   level: "info",
   format: format.combine(
@@ -21,10 +26,24 @@ const logger = createLogger({
   ),
   transports: [
     // for all the error logs
-    new transports.File({ filename: "logs/error.log", level: "error" }),
-
+    new DailyRotateFile({
+      filename: "logs/error-%DATE%.log",
+      level: "error",
+      datePattern: "YYYY-MM-DD",
+      maxFiles: "1d",
+      zippedArchive: true,
+      auditFile: "logs/error-audit.json",
+    }),
     // for all the other logs
-    new transports.File({ filename: "logs/info.log" }),
+    new DailyRotateFile({
+      filename: "logs/info-%DATE%.log",
+      level: "info",
+      datePattern: "YYYY-MM-DD",
+      maxFiles: "1d",
+      zippedArchive: true,
+      auditFile: "logs/info-audit.json",
+      format: format.combine(infoOnly),
+    }),
   ],
 });
 // for logging in the console during development
