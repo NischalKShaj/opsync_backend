@@ -1,4 +1,5 @@
 // knexfile.js
+require("ts-node/register/transpile-only");
 require("dotenv").config();
 
 module.exports = {

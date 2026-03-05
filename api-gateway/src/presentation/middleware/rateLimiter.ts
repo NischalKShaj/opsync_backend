@@ -4,6 +4,7 @@
 import { RateLimiterRedis } from "rate-limiter-flexible";
 import redis from "../../infrastructure/cache/redis";
 import { Request, Response, NextFunction } from "express";
+import logger from "../../infrastructure/logger/logger";
 
 // setting up the rate limiter
 const rateLimiter = new RateLimiterRedis({
@@ -23,7 +24,18 @@ export const rateLimiterMiddleware = async (
     const ip = req.ip || req.socket.remoteAddress || "unknown-ip";
     await rateLimiter.consume(ip);
     next();
-  } catch (error) {
-    return res.status(429).json({ message: "Too Many Requests" });
+  } catch (error: any) {
+    logger.error("rate limiter error", {
+      error: error.message,
+      stack: error.stack,
+    });
+
+    if (error?.msBeforeNext) {
+      return res.status(429).json({
+        message: "Too Many Requests",
+        retryAfter: Math.ceil(error.msBeforeNext / 1000),
+      });
+    }
+    next();
   }
 };

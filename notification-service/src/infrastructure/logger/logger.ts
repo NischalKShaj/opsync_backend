@@ -5,6 +5,8 @@ import { createLogger, format, transports } from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 import fs from "fs";
 import path from "path";
+import dotenv from "dotenv";
+dotenv.config();
 
 // creating the logs directory if it doesn't exist
 const logDir = path.join(process.cwd(), "logs");

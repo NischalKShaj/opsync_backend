@@ -7,7 +7,7 @@ import logger from "./infrastructure/logger/logger";
 
 dotenv.config();
 
-const PORT = process.env.PORT || 3003;
+const PORT = process.env.PORT || 4003;
 
 app.listen(PORT, () => {
   logger.info(`Notification Service running on port ${PORT}`);

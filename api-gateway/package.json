@@ -18,6 +18,7 @@
     "express": "^5.2.1",
     "helmet": "^8.1.0",
     "http-proxy-middleware": "^3.0.5",
+    "ioredis": "^5.10.0",
     "morgan": "^1.10.1",
     "nodemon": "^3.1.14",
     "rate-limiter-flexible": "^9.1.1",

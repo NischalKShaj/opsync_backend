@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.ts",
   "scripts": {
-    "dev": "tsx watch  src/server.ts --poll",
+    "dev": "sleep 5 && ts-node --transpile-only node_modules/.bin/knex migrate:latest --knexfile knexfile.cjs --env development && tsx watch src/server.ts --poll",
     "build": "tsc",
     "start": "node dist/server.js",
     "migrate:latest": "ts-node node_modules/.bin/knex migrate:latest --knexfile knexfile.js"
@@ -29,6 +29,7 @@
     "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
+    "@types/axios": "^0.9.36",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",

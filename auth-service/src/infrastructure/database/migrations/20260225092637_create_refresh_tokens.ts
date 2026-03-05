@@ -1,6 +1,6 @@
 import { Knex } from "knex";
 
-export async function up(knex: Knex) {
+export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable("refresh_tokens", (table) => {
     table.uuid("id").primary().defaultTo(knex.raw("gen_random_uuid()"));
     table.uuid("user_id").references("id").inTable("users").onDelete("CASCADE");
@@ -10,6 +10,6 @@ export async function up(knex: Knex) {
   });
 }
 
-export async function down(knex: Knex) {
+export async function down(knex: Knex): Promise<void> {
   await knex.schema.dropTable("refresh_tokens");
 }

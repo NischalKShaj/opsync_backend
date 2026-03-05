@@ -1,22 +1,23 @@
 // file to establish connection to redis
 
 // importing the required modules
-import { createClient } from "redis";
+import Redis from "ioredis";
 import logger from "../logger/logger";
+import dotenv from "dotenv";
+dotenv.config();
 
 // setting the url
-const redis = createClient({
-  url: process.env.REDIS_URL || "redis://localhost:6379",
-});
+const redis = new Redis(process.env.REDIS_URL || "redis://redis:6379");
 
 redis.on("error", (err) => {
-  logger.error("Redis Client Error", { error: err.message, stack: err.stack });
+  logger.error("Redis Client Error", {
+    error: err.message,
+    stack: err.stack,
+  });
 });
 
-redis.on("connect", () => {
-  logger.info("✅ Redis Connected");
+redis.on("ready", () => {
+  logger.info("✅ Redis Ready");
 });
-
-redis.connect();
 
 export default redis;
