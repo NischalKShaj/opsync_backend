@@ -13,6 +13,7 @@ dotenv.config();
 
 // importing the proxies
 import { AuthProxy } from "./presentation/proxy/auth.proxy";
+import { ChatProxy } from "./presentation/proxy/chat.proxy";
 
 // setting up the app
 const app = express();
@@ -30,6 +31,7 @@ app.use(rateLimiterMiddleware);
 
 // set up the api gateways
 app.use("/auth", AuthProxy);
+app.use("/chat", ChatProxy);
 
 // setting up the body parser
 app.use(express.json());
