@@ -14,5 +14,12 @@ router.get("/", authenticateToken, convoController.getConversations);
 // router for getting the messages by conversation id
 router.get("/:id/message", authenticateToken, convoController.getMessages);
 
+// router for creating a new group
+router.post(
+  "/create-group",
+  authenticateToken,
+  convoController.createGroupChat,
+);
+
 // exporting the router
 export default router;

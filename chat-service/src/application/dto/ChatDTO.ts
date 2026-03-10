@@ -17,6 +17,20 @@ export interface MessageDTO {
 export interface SendMessageDTO {
   senderId?: string;
   receiverId: string;
+  conversationId: string;
   message: string;
   messageType: string;
+}
+
+// interface for creating new group conversation
+export interface CreateGroupConvoDTO {
+  adminId: string;
+  participants: string[];
+  name: string;
+}
+
+// interface for marking the conversation read
+export interface MarkAsReadDTO {
+  conversationId: string;
+  userId: string;
 }

@@ -27,7 +27,10 @@ const conversationSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-conversationSchema.index({ participants: 1 });
+conversationSchema.index(
+  { participants: 1, type: 1 },
+  { unique: true, partialFilterExpression: { type: "direct" } },
+);
 
 export const ConversationModel = mongoose.model(
   "Conversation",

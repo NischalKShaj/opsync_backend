@@ -6,6 +6,7 @@ import { Conversation } from "../../domain/entities/Conversation";
 import { ConversationModel } from "../database/mongodb/models/conversation.model";
 import { Message } from "../../domain/entities/Message";
 import { MessageModel } from "../database/mongodb/models/message.model";
+import { ConversationController } from "../../presentation/controller/ConversationController";
 
 // class for the conversation repository
 export class ConversationRepository implements IConversationRepository {
@@ -135,17 +136,33 @@ export class ConversationRepository implements IConversationRepository {
     receiverId: string,
   ): Promise<Conversation> {
     try {
-      const newConversation = await ConversationModel.create({
-        type,
-        participants: [senderId, receiverId],
-      });
+      // sorting the participants to avoid the race situation
+      const participants = [senderId, receiverId].sort();
+
+      // for inserting and updating if exists
+      const conversation = await ConversationModel.findOneAndUpdate(
+        {
+          type,
+          participants,
+        },
+        {
+          $setOnInsert: {
+            type,
+            participants,
+          },
+        },
+        {
+          new: true,
+          upsert: true,
+        },
+      ).lean();
 
       return {
-        id: newConversation._id.toString(),
-        type: newConversation.type,
-        participants: newConversation.participants,
-        createdAt: newConversation.createdAt,
-        updatedAt: newConversation.updatedAt,
+        id: conversation._id.toString(),
+        type: conversation.type,
+        participants: conversation.participants,
+        createdAt: conversation.createdAt,
+        updatedAt: conversation.updatedAt,
       };
     } catch (error) {
       throw error;
@@ -194,6 +211,54 @@ export class ConversationRepository implements IConversationRepository {
       );
 
       return;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // for creating a group conversation
+  async createGroupConversation(
+    adminId: string,
+    participants: string[],
+    name: string,
+  ): Promise<Conversation> {
+    try {
+      const newConversation = await ConversationModel.create({
+        type: "group",
+        adminIds: [adminId],
+        participants: [adminId, ...participants],
+        name,
+      });
+
+      return {
+        id: newConversation._id.toString(),
+        participants: newConversation.participants,
+        type: newConversation.type,
+        name: newConversation.name ?? undefined,
+        adminIds: newConversation.adminIds,
+        createdAt: newConversation.createdAt,
+        updatedAt: newConversation.updatedAt,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // for marking the conversation as read
+  async markConversationAsSeen(
+    conversationId: string,
+    userId: string,
+  ): Promise<string> {
+    try {
+      await MessageModel.updateMany(
+        {
+          conversationId,
+          senderId: { $ne: userId },
+          readBy: { $ne: userId },
+        },
+        { $addToSet: { readBy: userId } },
+      );
+      return "success";
     } catch (error) {
       throw error;
     }

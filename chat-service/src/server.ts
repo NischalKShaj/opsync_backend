@@ -5,6 +5,8 @@ import app from "./app";
 import dotenv from "dotenv";
 import logger from "./infrastructure/logger/logger";
 import { connectMongoDB } from "./infrastructure/database/mongodb/connection";
+import http from "http";
+import { initSocket } from "./presentation/socket/socket.server";
 
 dotenv.config();
 
@@ -15,8 +17,14 @@ const PORT = process.env.PORT || 4003;
 async function startServer() {
   await connectMongoDB();
 
+  // for initializing the main server
+  const server = http.createServer(app);
+
+  // for initializing the socket server
+  initSocket(server);
+
   // starting the server
-  app.listen(PORT, () => {
+  server.listen(PORT, () => {
     logger.info(`Server is running on port ${PORT}`);
   });
 }

@@ -56,4 +56,27 @@ export class ConversationController {
       res.status(500).json({ success: false, message: error.message });
     }
   };
+
+  // for creating new group conversation
+  createGroupChat = async (req: Request, res: Response) => {
+    try {
+      const adminId = req.user?.userId as string;
+      const { participants, name } = req.body;
+
+      // for creating the group conversation
+      const result = await this.convoUseCase.createGroupConversation({
+        adminId,
+        participants,
+        name,
+      });
+
+      res.status(201).json({ success: true, data: result });
+    } catch (error: any) {
+      logger.error("Error while creating group chat", {
+        error: error.message,
+        stack: error.stack,
+      });
+      return res.status(500).json({ success: false, message: error.message });
+    }
+  };
 }

@@ -2,7 +2,13 @@
 
 // importing the required modules
 import { IConversationRepository } from "../../domain/interface/IConversationRepository";
-import { ConversationDTO, MessageDTO, SendMessageDTO } from "../dto/ChatDTO";
+import {
+  ConversationDTO,
+  CreateGroupConvoDTO,
+  MarkAsReadDTO,
+  MessageDTO,
+  SendMessageDTO,
+} from "../dto/ChatDTO";
 
 // class for the conversation use case
 export class ConversationUseCase {
@@ -51,24 +57,44 @@ export class ConversationUseCase {
   async sendMessage({
     senderId,
     receiverId,
+    conversationId,
     message,
     messageType,
   }: SendMessageDTO) {
     try {
-      // to check if any previous conversation between the sender and receiver exists
-      let conversation = await this.convoRepo.findDirectConversation(
-        senderId,
-        receiverId,
-      );
+      let conversation;
 
-      // create if no conversation exists
-      if (!conversation) {
-        const type = "direct";
-        conversation = await this.convoRepo.createConversation(
-          type,
+      // group chat
+      if (conversationId) {
+        conversation = await this.convoRepo.findConversationByIdAndUser(
+          conversationId,
+          senderId,
+        );
+
+        if (!conversation) {
+          throw new Error("Unauthorized access to conversation");
+        }
+      }
+
+      // for direct chat
+      else if (receiverId) {
+        // to check if any previous conversation between the sender and receiver exists
+        conversation = await this.convoRepo.findDirectConversation(
           senderId,
           receiverId,
         );
+
+        // create if no conversation exists
+        if (!conversation) {
+          const type = "direct";
+          conversation = await this.convoRepo.createConversation(
+            type,
+            senderId,
+            receiverId,
+          );
+        }
+      } else {
+        throw new Error("Invalid message payload");
       }
 
       // for saving the message in the conversation
@@ -86,7 +112,52 @@ export class ConversationUseCase {
         message,
       );
 
-      return latestMessage;
+      return {
+        latestMessage: latestMessage,
+        conversation_id: conversation.id,
+        participants: conversation.participants,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // for creating a group conversation
+  async createGroupConversation({
+    adminId,
+    participants,
+    name,
+  }: CreateGroupConvoDTO) {
+    try {
+      // for creating a group conversation
+      return await this.convoRepo.createGroupConversation(
+        adminId,
+        participants,
+        name,
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // for marking the conversation as seen
+  async markConversationAsSeen({ conversationId, userId }: MarkAsReadDTO) {
+    try {
+      // check if the conversation exists for the user
+      const conversation = await this.convoRepo.findConversationByIdAndUser(
+        conversationId,
+        userId,
+      );
+
+      if (!conversation) {
+        throw new Error("Unauthorized access to conversation");
+      }
+
+      // for marking the conversation as seen
+      return await this.convoRepo.markConversationAsSeen(
+        conversationId,
+        userId,
+      );
     } catch (error) {
       throw error;
     }

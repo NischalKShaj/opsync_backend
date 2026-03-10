@@ -42,11 +42,24 @@ export interface IConversationRepository {
     content: string,
   ): Promise<void>;
 
-  // method for creating a new conversation
+  // method for creating a new message
   createMessage(
     conversationId: string,
     senderId: string | undefined,
     message: string,
     messageType: string,
   ): Promise<Message>;
+
+  // method for creating a group conversation
+  createGroupConversation(
+    adminId: string,
+    participants: string[],
+    name: string,
+  ): Promise<Conversation>;
+
+  // method for marking the conversation as seen
+  markConversationAsSeen(
+    conversationId: string,
+    userId: string,
+  ): Promise<string>;
 }

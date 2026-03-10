@@ -39,26 +39,24 @@ export const initSocket = (httpServer: any) => {
   // for establishing the connection
   io.on("connection", async (socket: AuthenticatedSocket) => {
     const userId = socket?.userId;
-    logger.info("User connected", { userId: socket.userId });
-    try {
-      // load all the conversations for the user
-      const conversations = await convoUseCase.getConversationsById({
-        user_id: userId,
-      });
+    logger.info("User connected", { userId });
 
-      conversations.forEach((cv) => {
-        socket.join(cv.id);
-      });
-    } catch (error: any) {
-      logger.error("Failed to join user conversations", {
-        error: error.message,
-        stack: error.stack,
-      });
-    }
+    // join personal room
+    socket.join(`user:${userId}`);
+
     registerMessageHandler(io, socket, convoUseCase);
 
+    // join conversation dynamically
+    socket.on("joinConversation", ({ conversationId }) => {
+      socket.join(conversationId);
+    });
+
+    socket.on("leaveConversation", ({ conversationId }) => {
+      socket.leave(conversationId);
+    });
+
     socket.on("disconnect", () => {
-      logger.info("User disconnected", { userId: socket.userId });
+      logger.info("User disconnected", { userId });
     });
   });
 };
