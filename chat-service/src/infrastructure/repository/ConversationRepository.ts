@@ -6,7 +6,6 @@ import { Conversation } from "../../domain/entities/Conversation";
 import { ConversationModel } from "../database/mongodb/models/conversation.model";
 import { Message } from "../../domain/entities/Message";
 import { MessageModel } from "../database/mongodb/models/message.model";
-import { ConversationController } from "../../presentation/controller/ConversationController";
 
 // class for the conversation repository
 export class ConversationRepository implements IConversationRepository {

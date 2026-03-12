@@ -5,6 +5,8 @@ import { Server } from "socket.io";
 import { AuthenticatedSocket } from "../socket.types";
 import logger from "../../../infrastructure/logger/logger";
 import { ConversationUseCase } from "../../../application/use-cases/ConversationUseCase";
+import { isUserOnline } from "./presence.handler";
+import { pubClient } from "../../../infrastructure/redis/redis";
 
 // setting up the handler
 export const registerMessageHandler = (
@@ -39,15 +41,41 @@ export const registerMessageHandler = (
       io.to(conversation_id).emit("newMessage", latestMessage);
 
       //  for the notification service
-      participants
-        .filter((userId: string) => userId != senderId)
-        .forEach((userId: string) => {
-          io.to(`user:${userId}`).emit("messageNotification", {
-            conversation_id,
-            senderId,
-            message: latestMessage.encryptedMessage,
-          });
+      for (const userId of participants.filter((id) => id !== senderId)) {
+        const sockets = await io.in(`user:${userId}`).fetchSockets();
+
+        // user offline
+        if (sockets.length === 0) {
+          await pubClient.publish(
+            "message.sent",
+            JSON.stringify({
+              receiverId: userId,
+              senderId,
+              message: latestMessage.encryptedMessage,
+              conversationId: conversation_id,
+            }),
+          );
+          continue;
+        }
+
+        // for avoiding the duplicate notification
+        const isInConversation = sockets.some(
+          (s) => s.data.activeConversation === conversation_id,
+        );
+
+        if (isInConversation) {
+          continue;
+        }
+
+        // user online but not in the chat
+        io.to(`user:${userId}`).emit("messageNotification", {
+          conversationId: conversation_id,
+          senderId,
+          messageId: latestMessage.id,
+          createdAt: latestMessage.createdAt,
+          message: latestMessage.encryptedMessage,
         });
+      }
     } catch (err) {
       logger.error("Send message error", { err });
 
