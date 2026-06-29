@@ -25,3 +25,10 @@ export interface SignupDTO {
 export interface LogoutDTO {
   refreshToken: string;
 }
+
+export interface CreateOrganizationDTO {
+  organization: string;
+  name: string;
+  email: string;
+  password: string;
+}

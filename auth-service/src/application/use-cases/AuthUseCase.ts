@@ -2,7 +2,13 @@
 
 // importing the required modules
 import { IUserRepository } from "../../domain/interfaces/IUserRepository";
-import { LoginDTO, LogoutDTO, OTPSignupDTO, SignupDTO } from "../dto/AuthDTO";
+import {
+  CreateOrganizationDTO,
+  LoginDTO,
+  LogoutDTO,
+  OTPSignupDTO,
+  SignupDTO,
+} from "../dto/AuthDTO";
 import { PasswordHasher } from "../../infrastructure/security/PasswordHasher";
 import { JwtService } from "../../infrastructure/security/JwtService";
 import { generateOTP } from "../../domain/utils/generateOTP";
@@ -56,6 +62,56 @@ export class AuthUseCase {
     } catch (error) {
       throw error;
     }
+  }
+
+  // for creating the organization
+  async createOrganization(data: CreateOrganizationDTO) {
+    const { organization, name, email, password } = data;
+
+    // Check organization already exists
+    const existingOrganization = await this.repo.findOrganization(organization);
+
+    if (existingOrganization) {
+      throw new Error("Organization already exists");
+    }
+
+    // Check owner email already exists
+    const existingUser = await this.repo.findByEmail(email);
+
+    if (existingUser) {
+      throw new Error("User already exists");
+    }
+
+    const organizationId = randomUUID();
+    const userId = randomUUID();
+
+    const hashedPassword = await PasswordHasher.hash(password);
+
+    await this.repo.createOrganizationWithOwner({
+      organization: {
+        id: organizationId,
+        name: organization,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+
+      user: {
+        id: userId,
+        organization_id: organizationId,
+        username: name,
+        email,
+        password: hashedPassword,
+        role: "OrganizationAdmin",
+        designation: "CEO",
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    });
+
+    return {
+      organizationId,
+      userId,
+    };
   }
 
   // for creating the otp for the new user
@@ -138,14 +194,17 @@ export class AuthUseCase {
       // hashing the password
       const hashPassword = await PasswordHasher.hash(password);
 
-      await this.repo.createUser({
-        username,
-        email,
-        password: hashPassword,
-        phone_number,
-        role: role,
-        created_at: new Date(),
-      });
+      // await this.repo.createUser({
+      //   organization_id: uuidv4(),
+      //   username,
+      //   email,
+      //   password: hashPassword,
+      //   phone_number,
+      //   role: role,
+      //   designation: "",
+      //   created_at: new Date(),
+      //   updated_at: new Date(),
+      // });
 
       return "User created successfully";
     } catch (error) {

@@ -4,7 +4,20 @@ import { WorkspaceMember } from '../../domain/entities/WorkspaceMember';
 import db from '../database/connection';
 
 export class WorkspaceRepository implements IWorkspaceRepository {
+  // create the workspace
   async create(workspace: Omit<Workspace, 'id'>): Promise<Workspace> {
+    const existingWorkspace = await db('workspaces')
+    .where({
+      name: workspace.name,
+      owner_id: workspace.ownerId
+    })
+    .first();
+
+  if (existingWorkspace) {
+    // Throw a specific error your HTTP layer can catch
+    throw new Error('Workspace with this name already exists for this user');
+  }
+    
     const [result] = await db('workspaces')
       .insert({
         name: workspace.name,

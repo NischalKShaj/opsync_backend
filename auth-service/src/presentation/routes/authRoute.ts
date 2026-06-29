@@ -7,6 +7,9 @@ import { authController } from "../../config/di";
 // creating the router
 const router = Router();
 
+// router for creating the organization
+router.post("/create-organization", authController.createOrganization);
+
 // router for login
 router.post("/login", authController.login);
 

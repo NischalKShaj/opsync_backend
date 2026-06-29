@@ -20,10 +20,10 @@ export class WorkspaceController {
     private addMemberUseCase: AddMemberUseCase
   ) {}
 
+  // for creating the new work space
   async create(req: Request, res: Response): Promise<void> {
     try {
       const dto = new CreateWorkspaceDTO(req.body);
-      const userId = Array.isArray(req.headers['user-id']) ? req.headers['user-id'][0] : req.headers['user-id'] as string;
       
       const workspace = await this.createWorkspace.execute(dto);
       
@@ -34,9 +34,10 @@ export class WorkspaceController {
     }
   }
 
+  // for getting the workspace by id
   async getById(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
+      const { id } = req.params as {id:string};
       const workspace = await this.getWorkspace.execute(id);
       
       if (!workspace) {
@@ -51,6 +52,7 @@ export class WorkspaceController {
     }
   }
 
+  // for listing the workspaces
   async list(req: Request, res: Response): Promise<void> {
     try {
       const userId = Array.isArray(req.headers['user-id']) ? req.headers['user-id'][0] : req.headers['user-id'] as string;
@@ -63,9 +65,10 @@ export class WorkspaceController {
     }
   }
 
+  // for updating the workspace
   async update(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
+      const { id } = req.params as {id:string};
       const dto = new UpdateWorkspaceDTO(req.body);
       const userId = Array.isArray(req.headers['user-id']) ? req.headers['user-id'][0] : req.headers['user-id'] as string;
       
@@ -83,9 +86,10 @@ export class WorkspaceController {
     }
   }
 
+  // for deleting the workspace
   async delete(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
+      const { id } = req.params as {id:string};
       const userId = Array.isArray(req.headers['user-id']) ? req.headers['user-id'][0] : req.headers['user-id'] as string;
       
       const deleted = await this.deleteWorkspace.execute(id, userId);
@@ -101,7 +105,8 @@ export class WorkspaceController {
     }
   }
 
-  async addMember(req: Request, res: Response): Promise<void> {
+  // for adding a member to the workspace
+    async addMember(req: Request, res: Response): Promise<void> {
     try {
       const dto = new AddMemberDTO(req.body);
       const addedByUserId = Array.isArray(req.headers['user-id']) ? req.headers['user-id'][0] : req.headers['user-id'] as string;

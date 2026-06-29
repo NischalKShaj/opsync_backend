@@ -9,6 +9,31 @@ import logger from "../../infrastructure/logger/logger";
 export class AuthController {
   constructor(private useCase: AuthUseCase) {}
 
+  // for creating the organization
+  createOrganization = async (req: Request, res: Response) => {
+    try {
+      const { organization, name, email, password } = req.body;
+      const result = await this.useCase.createOrganization({
+        organization,
+        name,
+        email,
+        password,
+      });
+      return res.status(200).json({ success: true, data: result });
+    } catch (error: any) {
+      logger.error("Error during create organization", {
+        error: error.message,
+        stack: error.stack,
+      });
+      if (error instanceof Error) {
+        return res.status(500).json({ success: false, error: error.message });
+      }
+      return res
+        .status(500)
+        .json({ success: false, error: "something went wrong" });
+    }
+  };
+
   // for login the user
   login = async (req: Request, res: Response) => {
     try {
