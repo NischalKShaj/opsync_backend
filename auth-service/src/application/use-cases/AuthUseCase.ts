@@ -58,6 +58,7 @@ export class AuthUseCase {
           email: user.email,
           name: user.username,
         },
+        mustChangePassword: user.must_change_password,
       };
     } catch (error) {
       throw error;
@@ -103,10 +104,14 @@ export class AuthUseCase {
         password: hashedPassword,
         role: "OrganizationAdmin",
         designation: "CEO",
+        must_change_password: false,
         created_at: new Date(),
         updated_at: new Date(),
       },
     });
+
+    // for sending the acknowledgement mail to the CEO
+    await this.notification.sendAcknowledgementMail(email, organization, name);
 
     return {
       organizationId,
@@ -115,30 +120,58 @@ export class AuthUseCase {
   }
 
   // for creating the otp for the new user
-  async createUser({ email }: OTPSignupDTO): Promise<string> {
+  async createUser({
+    email,
+    username,
+    phone_number,
+    password,
+    role,
+    organizationName,
+    designation,
+  }: SignupDTO): Promise<string> {
     try {
       // check if the user already exist or not
       const existingUser = await this.repo.findByEmail(email);
 
       if (existingUser) throw new Error("User with same email already exists");
 
-      // function for generating OTP
-      const otp = generateOTP(6);
+      const hashPassword = await PasswordHasher.hash(password);
 
-      // storing the otp in redis for 5 minutes
-      await redis.setEx(`otp:signup:${email}`, 300, otp);
+      const fetchOrganization =
+        await this.repo.findOrganization(organizationName);
+
+      const user = {
+        id: randomUUID(),
+        email,
+        username,
+        phone_number,
+        password: hashPassword,
+        role,
+        designation,
+        organization_id: fetchOrganization?.id,
+        must_change_password: true,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      await this.repo.createUser(user);
 
       // sending the otp
-      await this.notification.sendOTP(email, otp, "signup");
+      await this.notification.sendWelcomeMail(
+        email,
+        password,
+        username,
+        organizationName,
+      );
 
-      return "OTP sent successfully";
+      return "User created successfully";
     } catch (error) {
       throw error;
     }
   }
 
   // for resending the otp
-  async resendOTP({ email }: OTPSignupDTO) {
+  async resendOTP({ email }: { email: string }) {
     try {
       // for setting the rate limiter for the resend logic
       const cooldownKey = `otp:cooldown:${email}`;
@@ -171,14 +204,7 @@ export class AuthUseCase {
   }
 
   // async verify and create the user
-  async verifyOTP({
-    email,
-    otp,
-    username,
-    phone_number,
-    role,
-    password,
-  }: SignupDTO) {
+  async verifyOTP({ email, otp }: OTPSignupDTO) {
     try {
       // check if the otp is valid and present
       const storedOtp = await redis.get(`otp:signup:${email}`);
@@ -190,9 +216,6 @@ export class AuthUseCase {
 
       // removing from redis after verification
       await redis.del(`otp:signup:${email}`);
-
-      // hashing the password
-      const hashPassword = await PasswordHasher.hash(password);
 
       // await this.repo.createUser({
       //   organization_id: uuidv4(),

@@ -12,6 +12,7 @@ export async function up(knex: Knex): Promise<void> {
     table.string("username", 100).notNullable();
     table.string("email", 150).unique().notNullable();
     table.string("password").notNullable();
+    table.boolean("must_change_password").defaultTo(true);
     table.string("role").notNullable();
     table.string("designation").notNullable();
     table.string("phone_number").nullable();
