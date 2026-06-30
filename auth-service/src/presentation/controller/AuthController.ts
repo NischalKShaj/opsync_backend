@@ -12,9 +12,9 @@ export class AuthController {
   // for creating the organization
   createOrganization = async (req: Request, res: Response) => {
     try {
-      const { organization, name, email, password } = req.body;
+      const { organizationName, name, email, password } = req.body;
       const result = await this.useCase.createOrganization({
-        organization,
+        organization: organizationName,
         name,
         email,
         password,

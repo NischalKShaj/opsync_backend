@@ -13,6 +13,9 @@ router.post("/email/send-otp", notificationController.sendOtpMail);
 router.post("/email/send-welcome-mail", notificationController.sendWelcomeMail);
 
 // router for sending the acknowledgement mail to organization creator
-router.post("/email/send-acknowledgement-mail");
+router.post(
+  "/email/send-acknowledgement-mail",
+  notificationController.sendAcknowledgementMail,
+);
 
 export default router;

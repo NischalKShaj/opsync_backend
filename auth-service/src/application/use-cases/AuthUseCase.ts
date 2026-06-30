@@ -110,12 +110,41 @@ export class AuthUseCase {
       },
     });
 
+    const access_token = JwtService.generateAccessToken(
+      userId,
+      "OrganizationAdmin",
+    );
+
+    const refresh_token = JwtService.generateRefreshToken(
+      userId,
+      "OrganizationAdmin",
+    );
+
+    const refreshToken = {
+      user_id: userId!,
+      token: refresh_token,
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      created_at: new Date(),
+    };
+    // storing the refresh token in the database
+    await this.tokenRepo.createToken(refreshToken);
+
     // for sending the acknowledgement mail to the CEO
     await this.notification.sendAcknowledgementMail(email, organization, name);
 
     return {
-      organizationId,
-      userId,
+      organization: {
+        organizationId,
+        name: organization,
+      },
+      user: {
+        userId,
+        email,
+        name,
+      },
+      mustChangePassword: true,
+      accessToken: access_token,
+      refreshToken: refresh_token,
     };
   }
 
