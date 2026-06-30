@@ -9,6 +9,31 @@ import logger from "../../infrastructure/logger/logger";
 export class AuthController {
   constructor(private useCase: AuthUseCase) {}
 
+  // for creating the organization
+  createOrganization = async (req: Request, res: Response) => {
+    try {
+      const { organization, name, email, password } = req.body;
+      const result = await this.useCase.createOrganization({
+        organization,
+        name,
+        email,
+        password,
+      });
+      return res.status(200).json({ success: true, data: result });
+    } catch (error: any) {
+      logger.error("Error during create organization", {
+        error: error.message,
+        stack: error.stack,
+      });
+      if (error instanceof Error) {
+        return res.status(500).json({ success: false, error: error.message });
+      }
+      return res
+        .status(500)
+        .json({ success: false, error: "something went wrong" });
+    }
+  };
+
   // for login the user
   login = async (req: Request, res: Response) => {
     try {
@@ -36,9 +61,46 @@ export class AuthController {
   // for signup the user
   signup = async (req: Request, res: Response) => {
     try {
-      const { email } = req.body;
-      const result = await this.useCase.createUser({ email });
-      return res.status(200).json({ success: true, data: result });
+      const {
+        email,
+        username,
+        phoneNumber,
+        password,
+        role,
+        organizationName,
+        designation,
+      } = req.body;
+
+      const requiredFields = {
+        email,
+        username,
+        phoneNumber,
+        password,
+        role,
+        organizationName,
+        designation,
+      };
+
+      const missingField = Object.entries(requiredFields).find(
+        ([_, value]) => value === undefined || value === null || value === "",
+      );
+
+      if (missingField) {
+        return res.status(400).json({
+          success: false,
+          data: `${missingField[0]} is required`,
+        });
+      }
+      const result = await this.useCase.createUser({
+        email,
+        username,
+        phone_number: phoneNumber,
+        password,
+        role,
+        organizationName,
+        designation,
+      });
+      return res.status(201).json({ success: true, data: result });
     } catch (error: any) {
       logger.error("Error during signup", {
         error: error.message,
@@ -77,15 +139,11 @@ export class AuthController {
   // for verifying the otp
   verifyOTP = async (req: Request, res: Response) => {
     try {
-      const { email, otp, username, phoneNumber, password, role } = req.body;
+      const { email, otp } = req.body;
 
       const result = await this.useCase.verifyOTP({
         email,
         otp,
-        username,
-        phone_number: phoneNumber,
-        role,
-        password,
       });
 
       return res.status(201).json({ success: true, data: result });

@@ -9,19 +9,28 @@ export interface LoginDTO {
 // interface for signup the user and gen the otp
 export interface OTPSignupDTO {
   email: string;
+  otp: string;
 }
 
 // interface for the otp signup
 export interface SignupDTO {
   email: string;
-  otp: string;
   username: string;
   phone_number: string;
   password: string;
   role: string;
+  organizationName: string;
+  designation: string;
 }
 
 // interface for the logout
 export interface LogoutDTO {
   refreshToken: string;
+}
+
+export interface CreateOrganizationDTO {
+  organization: string;
+  name: string;
+  email: string;
+  password: string;
 }

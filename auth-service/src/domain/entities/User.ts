@@ -2,11 +2,15 @@
 
 // interface for the user
 export interface User {
-  id?: string;
+  id: string;
+  organization_id?: string;
+  username: string;
   email: string;
   password: string;
-  username: string;
-  phone_number: string;
+  must_change_password: boolean;
   role: string;
+  designation: string;
+  phone_number?: string;
   created_at: Date;
+  updated_at: Date;
 }

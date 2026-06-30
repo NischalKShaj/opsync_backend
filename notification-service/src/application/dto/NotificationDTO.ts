@@ -7,10 +7,25 @@ export interface SendOTPMailDTO {
   type: "signup" | "password-reset";
 }
 
+// interface for sending the welcome mail
+export interface SendWelcomeMailDTO {
+  email: string;
+  password: string;
+  username: string;
+  organizationName: string;
+}
+
 // interface for the email otp service
-export interface EmailOTPServiceDTO {
+export interface EmailServiceDTO {
   from: string;
   to: string;
   html: string;
   subject: string;
+}
+
+// interface for the acknowledgement mail
+export interface SendAckMailDTO {
+  email: string;
+  organizationName: string;
+  username: string;
 }

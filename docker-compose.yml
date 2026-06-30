@@ -17,6 +17,21 @@ services:
       - ./sql:/docker-entrypoint-initdb.d
     networks:
       - opsync-net
+  #===================
+  # MongoDB
+  #===================
+  mongodb:
+    image: mongo:8
+    container_name: mongodb
+    restart: unless-stopped
+    env_file:
+      - ./.env.mongo
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - opsync-net
 
   #===================
   # Redis
@@ -27,7 +42,6 @@ services:
     restart: unless-stopped
     networks:
       - opsync-net
-
 
   # ===========================
   # Auth Service
@@ -75,6 +89,28 @@ services:
       - opsync-net
 
   # ===========================
+  # Chat Service
+  # ===========================
+  chat-service:
+    container_name: chat-service
+    restart: unless-stopped
+    build:
+      context: ./chat-service
+      dockerfile: Dockerfile
+    volumes:
+      - ./chat-service:/app
+      - /app/node_modules
+    env_file:
+      - ./chat-service/.env.docker
+    ports:
+      - "4003:4003"
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - opsync-net
+
+  # ===========================
   # API Gateway (Optional)
   # ===========================
   gateway:
@@ -100,10 +136,11 @@ services:
 # ===========================
 volumes:
   postgres_data:
+  mongodb_data:
 
-# ===========================
-# Network
-# ===========================
+    # ===========================
+    # Network
+    # ===========================
 networks:
   opsync-net:
     driver: bridge
