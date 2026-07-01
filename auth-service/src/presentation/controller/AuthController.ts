@@ -166,6 +166,9 @@ export class AuthController {
   logout = async (req: Request, res: Response) => {
     try {
       const { refreshToken } = req.body;
+      logger.info("Logout request received", {
+        refreshToken,
+      });
       const result = await this.useCase.logout({ refreshToken });
       return res.status(200).json({ success: true, data: result });
     } catch (error: any) {
